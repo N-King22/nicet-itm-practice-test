@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NICET Level 1 ITM Practice Test</title>
+<style>
+  body{font-family:Segoe UI,Arial,sans-serif;background:#f3f4f6;margin:0;color:#1f2937}
+  header{background:#b91c1c;color:#fff;padding:16px 24px}
+  header h1{margin:0;font-size:1.3rem} header p{margin:4px 0 0;font-size:.85rem;opacity:.9}
+  main{max-width:820px;margin:20px auto;padding:0 16px}
+  .card{background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .q{font-weight:600;margin-bottom:10px}
+  label{display:block;padding:7px 10px;border-radius:6px;cursor:pointer;margin:3px 0;border:1px solid transparent}
+  label:hover{background:#f3f4f6}
+  .correct{background:#dcfce7;border-color:#16a34a}
+  .wrong{background:#fee2e2;border-color:#dc2626}
+  .expl{margin-top:8px;font-size:.88rem;background:#f9fafb;border-left:4px solid #6b7280;padding:8px 10px}
+  .tag{font-size:.72rem;color:#6b7280;text-transform:uppercase;margin-bottom:4px}
+  button{background:#b91c1c;color:#fff;border:0;padding:11px 22px;font-size:1rem;border-radius:6px;cursor:pointer;margin-right:8px}
+  button.alt{background:#374151}
+  select{padding:5px;font-size:.9rem}
+  #bar{position:sticky;top:0;background:#fff;padding:8px 16px;box-shadow:0 1px 3px rgba(0,0,0,.2);z-index:5;display:flex;justify-content:space-between;align-items:center;font-size:.9rem}
+  #result{font-size:1.3rem;font-weight:700}
+  .pass{color:#16a34a}.fail{color:#dc2626}
+</style>
+</head>
+<body>
+<header>
+  <h1>NICET Level 1 – Inspection &amp; Testing (ITM) Practice Exam</h1>
+  <p>20 random questions from a 200-question bank • NFPA 13 (2023), NFPA 20 (2022), NFPA 72 (2022), OSHA 29 CFR 1926 • Study aid only – verify against your books</p>
+</header>
+<div id="bar"><span id="progress">Loading…</span>
+  <span>Source: <select id="src"><option value="ALL">All sources</option><option>NFPA 13 (2023)</option><option>NFPA 20 (2022)</option><option>NFPA 72 (2022)</option><option>OSHA 29 CFR 1926</option></select></span></div>
+<main>
+  <div id="quiz"></div>
+  <div class="card" id="actions"></div>
+</main>
+
+<script>
+const A="NFPA 13 (2023)", B="NFPA 20 (2022)", C="NFPA 72 (2022)", D="OSHA 29 CFR 1926";
+// [source, question, CORRECT answer, wrong1, wrong2, wrong3, explanation]  (order is shuffled at test time)
+const BANK = [
+// ---------------- NFPA 13 (2023) ----------------
+[A,"Maximum protection area per standard spray sprinkler in a light hazard occupancy (hydraulic calculation):","225 sq ft","130 sq ft","100 sq ft","400 sq ft","Light hazard: 225 sq ft; ordinary hazard: 130 sq ft; extra hazard: 100 sq ft."],
+[A,"Maximum protection area per standard spray sprinkler in an ordinary hazard occupancy:","130 sq ft","225 sq ft","100 sq ft","200 sq ft","Ordinary hazard: 130 sq ft per sprinkler."],
+[A,"Maximum protection area per standard spray sprinkler in an extra hazard occupancy (hydraulically calculated):","100 sq ft","130 sq ft","225 sq ft","80 sq ft","Extra hazard: 100 sq ft."],
+[A,"Maximum spacing between standard spray sprinklers in light and ordinary hazard occupancies is generally:","15 ft","12 ft","20 ft","10 ft","Light/ordinary hazard: 15 ft; extra hazard: 12 ft."],
+[A,"Maximum spacing between standard spray sprinklers in extra hazard occupancies is generally:","12 ft","15 ft","10 ft","8 ft","Extra hazard spacing is limited to 12 ft."],
+[A,"Unless otherwise permitted, sprinklers must be spaced at least how far apart?","6 ft","3 ft","4 ft","10 ft","The minimum distance between sprinklers is 6 ft to prevent cold soldering (wetting of adjacent sprinklers)."],
+[A,"Minimum distance from a standard spray sprinkler to a wall:","4 in.","1 in.","6 in.","12 in.","Sprinklers must be at least 4 in. from walls."],
+[A,"Maximum distance from a standard spray sprinkler to a wall is:","One-half the allowable spacing between sprinklers","The full allowable spacing","One-quarter the allowable spacing","6 ft in all cases","Wall distance is limited to half the allowable sprinkler spacing."],
+[A,"Distance from the ceiling to the deflector of a standard spray pendent or upright sprinkler is typically:","1 in. to 12 in.","12 in. to 24 in.","0 in. to 1 in.","6 in. to 30 in.","Standard spray pendent/upright deflectors are generally 1 to 12 in. below the ceiling."],
+[A,"Minimum clearance required between sprinkler deflectors and the top of storage (standard spray) is:","18 in.","6 in.","12 in.","36 in.","Maintain at least 18 in. below the deflector."],
+[A,"Design density for a light hazard occupancy is:","0.10 gpm/sq ft","0.15 gpm/sq ft","0.20 gpm/sq ft","0.30 gpm/sq ft","Light hazard: 0.10 gpm/sq ft over 1,500 sq ft."],
+[A,"Design density for Ordinary Hazard Group 1:","0.15 gpm/sq ft","0.10 gpm/sq ft","0.20 gpm/sq ft","0.40 gpm/sq ft","OH1: 0.15 gpm/sq ft over 1,500 sq ft."],
+[A,"Design density for Ordinary Hazard Group 2:","0.20 gpm/sq ft","0.15 gpm/sq ft","0.30 gpm/sq ft","0.10 gpm/sq ft","OH2: 0.20 gpm/sq ft over 1,500 sq ft."],
+[A,"Design density for Extra Hazard Group 1:","0.30 gpm/sq ft","0.20 gpm/sq ft","0.40 gpm/sq ft","0.50 gpm/sq ft","EH1: 0.30 gpm/sq ft over 2,500 sq ft."],
+[A,"Design density for Extra Hazard Group 2:","0.40 gpm/sq ft","0.30 gpm/sq ft","0.20 gpm/sq ft","0.60 gpm/sq ft","EH2: 0.40 gpm/sq ft over 2,500 sq ft."],
+[A,"The design area for light and ordinary hazard occupancies on the density/area curves is up to:","1,500 sq ft","1,000 sq ft","2,500 sq ft","3,000 sq ft","Light/ordinary hazard curves are based on 1,500 sq ft; extra hazard on 2,500 sq ft."],
+[A,"Inside and outside hose stream allowance for light hazard:","100 gpm","0 gpm","250 gpm","500 gpm","Light hazard: 100 gpm combined inside and outside hose."],
+[A,"Hose stream allowance for ordinary hazard:","250 gpm","100 gpm","500 gpm","0 gpm","Ordinary hazard: 250 gpm."],
+[A,"Hose stream allowance for extra hazard:","500 gpm","250 gpm","100 gpm","750 gpm","Extra hazard: 500 gpm."],
+[A,"Water supply duration for a light hazard occupancy:","30 minutes","60 minutes","90 minutes","120 minutes","Light hazard: 30 minutes."],
+[A,"Water supply duration for an ordinary hazard occupancy:","60–90 minutes","30 minutes","90–120 minutes","15 minutes","Ordinary hazard: 60 to 90 minutes."],
+[A,"Water supply duration for an extra hazard occupancy:","90–120 minutes","30 minutes","60 minutes","15 minutes","Extra hazard: 90 to 120 minutes."],
+[A,"Standard hydrostatic acceptance test of sprinkler system piping:","200 psi for 2 hours","150 psi for 1 hour","100 psi for 4 hours","300 psi for 2 hours","200 psi (or 50 psi above max working pressure if over 150 psi) for 2 hours."],
+[A,"Dry pipe system air pressure leakage test:","40 psi for 24 hours, loss not more than 1.5 psi","20 psi for 1 hour","100 psi for 2 hours","60 psi for 8 hours, no loss","Test at 40 psi for 24 hr; leakage must not exceed 1.5 psi."],
+[A,"Maximum floor area protected by a single system riser for light and ordinary hazard:","52,000 sq ft","40,000 sq ft","25,000 sq ft","100,000 sq ft","Light/ordinary hazard: 52,000 sq ft per floor per system."],
+[A,"Maximum floor area per system riser for extra hazard (hydraulically calculated) or storage:","40,000 sq ft","52,000 sq ft","25,000 sq ft","100,000 sq ft","Extra hazard / high-piled storage: 40,000 sq ft."],
+[A,"A fast-response sprinkler has an RTI of:","50 (m·s)^1/2 or less","80 (m·s)^1/2 or more","100 or more","Between 50 and 80","Fast response: RTI ≤ 50; standard response: RTI ≥ 80."],
+[A,"A standard-response sprinkler has an RTI of:","80 (m·s)^1/2 or more","50 or less","Less than 25","Between 25 and 50","Standard response: RTI ≥ 80 (m·s)^1/2."],
+[A,"Flow from a K5.6 sprinkler at 20 psi is approximately:","25 gpm","20 gpm","40 gpm","56 gpm","Q = K√P = 5.6 × √20 ≈ 25 gpm."],
+[A,"Flow from a K8.0 sprinkler at 25 psi:","40 gpm","25 gpm","50 gpm","80 gpm","Q = 8.0 × √25 = 40 gpm."],
+[A,"Flow from a K11.2 sprinkler at 16 psi is approximately:","45 gpm","11 gpm","32 gpm","90 gpm","Q = 11.2 × √16 = 44.8 gpm."],
+[A,"Hazen-Williams C factor for new black steel pipe in a wet system:","120","100","140","150","Steel (wet): 120; steel (dry/preaction): 100; copper/CPVC: 150."],
+[A,"Hazen-Williams C factor for copper tube:","150","120","100","140","Copper and CPVC use C = 150."],
+[A,"Hazen-Williams C factor for steel pipe in a dry or preaction system:","100","120","140","150","Dry/preaction steel: 100."],
+[A,"Pressure change per foot of elevation of water:","0.433 psi","0.5 psi","1.0 psi","2.31 psi","0.433 psi per foot of height (2.31 ft per psi)."],
+[A,"Liquid-bulb color for a 175°F sprinkler:","Yellow","Red","Green","Orange","Orange 135, red 155, yellow 175, green 200, blue 286."],
+[A,"Liquid-bulb color for a 200°F sprinkler:","Green","Yellow","Blue","Red","Green = 200°F."],
+[A,"Liquid-bulb color for a 286°F sprinkler:","Blue","Green","Yellow","Red","Blue = 286°F."],
+[A,"Ordinary temperature classification range for sprinklers:","135–170°F","175–225°F","250–300°F","100–135°F","Ordinary: 135–170°F."],
+[A,"Intermediate temperature classification range for sprinklers:","175–225°F","135–170°F","250–300°F","325–375°F","Intermediate: 175–225°F."],
+[A,"High temperature classification range for sprinklers:","250–300°F","175–225°F","325–375°F","135–170°F","High: 250–300°F."],
+[A,"In a double-interlock preaction system, water enters the piping when:","Both the detection system and a sprinkler operate","Only the detection system operates","Only a sprinkler opens","A manual valve is closed","Double interlock requires both detection and sprinkler operation (air loss)."],
+[A,"A deluge system uses:","Open sprinklers, with water released by detection","Closed sprinklers and a wet riser","Fusible-link sprinklers only","Only pendent heads on air","Deluge systems have open sprinklers; water flows to all when the deluge valve trips."],
+[A,"The system air supply for a dry pipe system must restore normal air pressure within:","30 minutes","5 minutes","60 minutes","4 hours","Air supply must restore pressure within 30 minutes."],
+[A,"Spare sprinklers: a system with 300 or fewer sprinklers requires at least:","6 spares","2 spares","12 spares","24 spares","≤300: 6; 300–1,000: 12; >1,000: 24."],
+[A,"Spare sprinklers: a system with more than 1,000 sprinklers requires at least:","24 spares","6 spares","12 spares","36 spares","More than 1,000 sprinklers: 24 spares."],
+[A,"A sprinkler cabinet must also contain:","A sprinkler wrench for each type of sprinkler","A fire extinguisher","A spare alarm bell","A hydrant wrench","The special sprinkler wrench is stored with the spare sprinklers."],
+[A,"A main drain connection is required:","At each system riser","Only on dry systems","Only at the fire department connection","At the roof only","Each system riser needs a main drain."],
+[A,"Sprinkler guards are required where sprinklers are:","Subject to mechanical damage","In light hazard areas","Concealed above ceilings","In a wet system","Guards protect sprinklers exposed to mechanical damage."],
+[A,"Which is an example of a light hazard occupancy?","Offices","Aircraft hangars","Flammable liquid spraying","Woodworking","Light hazard examples include offices, churches, schools, museums."],
+[A,"Which is an example of an ordinary hazard (Group 1) occupancy?","Parking garages","Churches","Aircraft hangars","Offices","OH1 includes parking garages, laundries, restaurant service areas."],
+[A,"Which is an example of an extra hazard occupancy?","Flammable liquid spraying","Offices","Libraries (small stack areas)","Hotel guest rooms","Extra hazard includes flammable liquid spraying and similar."],
+[A,"The retard chamber on a wet alarm check valve is used to:","Prevent false alarms from pressure surges","Speed up the alarm","Drain the system","Admit air","The retard chamber absorbs surges so brief pressure fluctuations don't cause alarms."],
+[A,"A dry pipe valve stays closed because:","Air pressure acts over a larger area than water pressure on the clapper","Water pressure is greater than air pressure","A spring holds it shut","A solenoid is energized","Differential design: lower air pressure on the larger area holds back higher water pressure."],
+[A,"An accelerator (quick-opening device) on a dry system:","Speeds up dry pipe valve operation","Increases air pressure","Detects smoke","Drains the system","It speeds valve operation so water reaches the sprinkler sooner."],
+[A,"The 'three times rule' for obstructions refers to:","Sprinkler distance from an obstruction being at least three times its maximum dimension","Needing three sprinklers per room","Three hangers per pipe","Three-hour fire rating","Distance to an obstruction must be ≥ 3 × the max dimension (within limits)."],
+[A,"Dry-type sprinklers are used to protect:","Areas subject to freezing (e.g., cold rooms, loading docks)","Wet pipe risers","Fire pump rooms only","High-piled storage only","Dry sprinklers extend into cold areas while piping stays heated."],
+[A,"A hydrant flow test is used to determine:","Static pressure, residual pressure and flow","Pipe diameter","Sprinkler temperature","Alarm sensitivity","It measures static/residual pressure and flow of the water supply."],
+[A,"A pitot tube gauge measures:","Velocity pressure of flowing water","Static pressure only","Temperature","Pipe diameter","Pitot reading gives velocity pressure used to compute flow."],
+[A,"Sprinkler pipe hangers must support:","5 times the weight of water-filled pipe plus 250 lb at the point of support","Only the weight of the pipe","10 times pipe weight","The weight of the water only","NFPA 13 requires hangers to support 5× the weight plus 250 lb."],
+[A,"Control valves on sprinkler systems must be:","Listed indicating-type valves","Quarter-turn ball valves without indicators","Non-supervised valves","Any gate valve","Control valves must be listed indicating type (e.g., OS&Y, indicating butterfly)."],
+[A,"Pressure gauges on a dry pipe valve are required:","Above and below the dry pipe valve (air and water)","Only on the water side","Only at the roof","Not required","Gauges indicate system air and water supply pressure."],
+[A,"Sprinklers that have been painted (other than by the manufacturer):","Must be replaced","May be cleaned and left in service","Are acceptable if the paint is thin","Need only be inspected yearly","Field-painted or corroded sprinklers must be replaced."],
+[A,"Hydraulic calculation information sign at the riser identifies:","Design basis (density, area, flow, pressure)","Sprinkler manufacturer","Installer license","Building owner","The hydraulic placard shows design density, area, and required flow/pressure."],
+// ---------------- NFPA 20 (2022) ----------------
+[B,"A fire pump must deliver at 150% of rated flow not less than what percent of rated pressure?","65%","50%","85%","100%","At 150% flow, pressure must be ≥ 65% of rated."],
+[B,"The shutoff (churn) pressure of a centrifugal fire pump must not exceed:","140% of rated pressure","120% of rated pressure","110% of rated pressure","165% of rated pressure","Churn pressure must not exceed 140% of rated pressure."],
+[B,"Which is NOT a standard rated fire pump capacity?","600 gpm","500 gpm","750 gpm","1,000 gpm","Standard ratings include 500, 750, 1,000, 1,250, 1,500 gpm; 600 is not."],
+[B,"Maximum suction pipe velocity (at 150% rated flow) is:","15 ft/sec","10 ft/sec","20 ft/sec","25 ft/sec","Suction velocity limited to 15 ft/sec."],
+[B,"Maximum discharge pipe velocity (at 150% rated flow) is generally:","20 ft/sec","15 ft/sec","30 ft/sec","10 ft/sec","Discharge velocity is limited to 20 ft/sec."],
+[B,"The fire pump start pressure should be set:","At least 5 psi below the jockey pump start pressure","Above the jockey pump stop pressure","Equal to jockey stop pressure","At churn pressure","Fire pump cut-in is set ≥5 psi below the jockey pump start."],
+[B,"The jockey pump start pressure should be at least ___ below its stop pressure:","10 psi","1 psi","25 psi","50 psi","Jockey start is at least 10 psi below stop."],
+[B,"The pressure sensing line to a fire pump controller is nominally:","1/2 in. pipe/tube","2 in. pipe","1/4 in. tube","3 in. pipe","Sensing line is 1/2 in. nominal."],
+[B,"The pressure sensing line contains two check valves, each with an orifice of:","3/32 in.","1/2 in.","1/8 in. exactly in only one valve","1 in.","Each check valve has a 3/32 in. hole to dampen pressure surges."],
+[B,"Minimum diesel fuel tank capacity is:","1 gal per hp plus 5% expansion and 5% sump","0.5 gal per hp","2 gal per hp","1 gal per hp with no extra","Fuel tank: 1 gal/hp + 5% volume expansion + 5% sump volume."],
+[B,"The pump room temperature for a diesel engine (without engine heater) must be at least:","70°F at the engine air intake","40°F","32°F","100°F","Diesel engine rooms: 70°F; pump room with electric pump: at least 40°F."],
+[B,"A diesel fire pump engine must have:","Two batteries (two sets of batteries)","One battery","No battery (air start only)","Three alternators","Two batteries, each capable of cranking the engine, are required."],
+[B,"The automatic cranking cycle of a diesel pump controller is:","Six attempts of about 15 seconds crank and 15 seconds rest","Two attempts of 30 seconds","Continuous cranking until start","Three attempts of 5 seconds","Six crank attempts, 15 s on / 15 s off."],
+[B,"A limited service fire pump controller may be used for pumps up to:","30 hp (at 600 V or less)","10 hp","100 hp","200 hp","Limited service controllers: up to 30 hp, 600 V."],
+[B,"Voltage drop at the controller line terminals during motor starting must not exceed:","15% below normal","5% below normal","25% below normal","50% below normal","Starting voltage drop max 15%."],
+[B,"Voltage at the motor terminals while running at 115% of full load must not drop more than:","5% below the controller rated voltage","15%","20%","1%","Running voltage drop max 5% at motor terminals."],
+[B,"An eccentric tapered suction reducer on a horizontal pump must be installed:","With the flat side up","With the flat side down","Concentric","Vertical only","Flat side up avoids trapped air in the pump suction."],
+[B,"The discharge pressure gauge dial range is approximately:","Twice the rated pump pressure, not less than 200 psi","The rated pressure","Half the rated pressure","Fixed 100 psi","Dial should read about twice rated pressure, minimum 200 psi."],
+[B,"An electric motor-driven fire pump controller should be located:","As close as practicable to and within sight of the motor","In the lobby","On the roof","Outside the building","Controller is located close to and within sight of the motor."],
+[B,"Fire pump controllers must be:","Listed for fire pump service","Any industrial motor starter","Non-listed if manufacturer certified","Installed in a lockable cabinet only","Controllers must be listed for fire pump service."],
+[B,"Overcurrent protection in a fire pump power circuit must:","Carry locked-rotor current indefinitely","Trip on locked-rotor current","Trip within 10 seconds on start","Be a standard thermal-magnetic only","Fire pump protection must allow starting and carry locked rotor current indefinitely."],
+[B,"An automatic transfer switch for fire pump alternate power must be:","Listed for fire pump service","A general purpose ATS","Manual only","Located in the lobby","Fire pump ATS must be listed for fire pump service."],
+[B,"A vertical turbine pump is typically used when:","Water is drawn from a well, pit, or below-grade source","The water supply is a pressurized city main only","Space is limited to a hallway","Only in high-rise standpipes","Vertical turbine pumps lift from wells, ponds, and tanks below the pump."],
+[B,"A test header is used to:","Flow water during pump acceptance and annual tests","Fill the jockey pump","Prime the pump","Drain the roof","The test header allows flow testing and discharge to atmosphere."],
+[B,"A pressure relief valve is required on a diesel engine-driven pump when:","Engine overspeed could cause pressure above system rating","Always on electric pumps","Never on diesel pumps","Only for tanks","Needed where overspeed can raise discharge pressure beyond the system rating."],
+[B,"A circulation relief valve is used to:","Prevent pump overheating at churn","Increase flow","Relieve system overpressure","Maintain jockey pressure","It discharges small flow to remove heat when the pump runs at shutoff."],
+[B,"A diesel fire pump engine is permitted to shut down automatically for:","Overspeed only","Low oil pressure","High coolant temperature","Low fuel level","Only overspeed shutdown (manual reset) is allowed; other trips must be alarm only."],
+[B,"A jockey pump is used to:","Maintain system pressure and prevent unnecessary fire pump starts","Provide primary fire flow","Fill the fuel tank","Supply foam","It makes up small leaks so the main pump doesn't cycle."],
+[B,"A vortex plate in a suction tank is used to:","Prevent vortexing and air entrainment","Increase tank volume","Filter debris","Heat the water","Vortex plates prevent air from entering the pump suction."],
+[B,"When a fire pump is started automatically, it should be stopped:","Manually","Automatically after 10 minutes","By the jockey pump","By the pressure switch","Automatic start requires manual shutdown (except in specific cases)."],
+[B,"Fire pump rooms in a sprinklered building must be separated from other areas by at least:","1-hour fire-rated construction","No separation","3-hour fire-rated construction","30 minutes","1-hour if sprinklered; 2-hour if unsprinklered."],
+[B,"The fire pump acceptance test flow points are:","0% (churn), 100%, and 150% of rated flow","25%, 50%, 75%","50%, 100%, 200%","100% only","Acceptance tests run churn, rated, and 150% capacity."],
+[B,"The disconnecting means in the controller must be:","Capable of being locked in the closed position","Opened by the alarm","Located on the roof","Hidden from view","The isolating switch can be locked closed to prevent unauthorized opening."],
+[B,"A fire pump nameplate must state:","Rated flow, pressure, and speed","Owner name","Installer phone number","Building address","The pump nameplate lists rated capacity, pressure, and rpm."],
+[B,"Which fire pump driver is commonly used where reliable electric power is not available?","Diesel engine","Gas turbine only","Steam only","Hand crank","Diesel engines are used where power is not reliable."],
+[B,"A horizontal split-case pump is characterized by:","A casing split along the shaft centerline","A vertical shaft in a well","Direct coupling to a motor on the ceiling","Submersible design","Split-case pumps have a casing split horizontally for service."],
+[B,"The fire pump controller must annunciate (alarm) at least:","Power available/loss of phase, phase reversal, and pump running (local/remote)","Only a green light","Only temperature","Only fuel level","Required signals include pump running, loss of power/phase, and phase reversal."],
+[B,"The flow at 150% of a 750 gpm pump is:","1,125 gpm","900 gpm","1,500 gpm","750 gpm","750 × 1.5 = 1,125 gpm."],
+[B,"A 1,000 gpm, 100 psi pump must deliver at least ___ at 1,500 gpm:","65 psi","100 psi","140 psi","85 psi","65% of 100 psi = 65 psi at 150% flow."],
+[B,"The maximum churn pressure of a 100 psi rated pump is:","140 psi","120 psi","100 psi","165 psi","140% × 100 = 140 psi."],
+// ---------------- NFPA 72 (2022) ----------------
+[C,"Secondary (standby) power for a fire alarm system must operate the system for:","24 hours plus 5 minutes of alarm","12 hours plus 15 minutes","4 hours plus 5 minutes","48 hours plus 1 hour","Standard: 24 h standby followed by 5 min alarm."],
+[C,"Emergency voice/alarm communications secondary power requires ___ of alarm after 24 hours standby:","15 minutes","5 minutes","30 minutes","60 minutes","ECS: 24 h standby + 15 min alarm."],
+[C,"Maximum listed spacing for a smoke detector on a smooth ceiling:","30 ft","15 ft","50 ft","70 ft","Listed spacing is 30 ft unless otherwise listed."],
+[C,"With 30 ft spacing, any point on the ceiling must be within what distance of a detector (0.7S)?","21 ft","15 ft","30 ft","25 ft","0.7 × 30 ft = 21 ft."],
+[C,"Ceiling-mounted smoke detectors must be at least ___ from a side wall:","4 in.","1 in.","12 in.","24 in.","Avoid the 4 in. dead air space at the wall/ceiling junction."],
+[C,"The operable part of a manual fire alarm box must be mounted between:","42 in. and 48 in. above the floor","24–36 in.","54–60 in.","60–72 in.","Operable part is 42–48 in. above floor."],
+[C,"Manual stations are required within what distance of each exit doorway?","5 ft","10 ft","25 ft","50 ft","Located within 5 ft of exits on each floor."],
+[C,"Maximum travel distance to a manual fire alarm box on a floor is:","200 ft","100 ft","300 ft","50 ft","Travel distance to a manual station should not exceed 200 ft."],
+[C,"Public mode audible signals must exceed average ambient sound by at least:","15 dB","5 dB","10 dB","30 dB","15 dB above average ambient or 5 dB over maximum sound, whichever is greater."],
+[C,"Audible alarms in sleeping areas must be at least ___ at the pillow:","75 dBA","60 dBA","65 dBA","90 dBA","Sleeping area minimum 75 dBA at pillow."],
+[C,"The maximum sound pressure level of audible notification appliances at the minimum hearing distance:","110 dBA","90 dBA","120 dBA","130 dBA","Maximum is 110 dBA."],
+[C,"Visual notification appliance (strobe) flash rate must be:","1 to 2 flashes per second","3 to 5 flashes per second","One flash every 10 seconds","Steady","Flash rate is 1–2 Hz."],
+[C,"Wall-mounted strobes must be mounted with the lens between:","80 in. and 96 in. above the floor","36–48 in.","60–72 in.","96–120 in.","Lens 80–96 in. above floor (or 6 in. below the ceiling if lower)."],
+[C,"In sleeping areas, the audible tone requirement (for those who must be awakened) is a:","520 Hz low-frequency signal","1,000 Hz tone","4,000 Hz tone","Continuous bell","Low-frequency 520 Hz square wave is required in sleeping areas."],
+[C,"The required audible evacuation signal pattern is:","Temporal 3","Continuous","March time","Slow whoop","Temporal pattern 3 (ANSI/ASA S3.41) is required."],
+[C,"A trouble signal indicates:","A fault in the system (e.g., open circuit, ground fault)","A fire","A closed sprinkler valve","A test","Trouble = fault/impairment of the system."],
+[C,"A supervisory signal indicates:","A condition requiring attention such as a closed valve or low air pressure","A fire","A power failure only","A test mode","Supervisory = off-normal condition of a supervised system."],
+[C,"An alarm signal indicates:","An emergency requiring immediate action (e.g., fire)","A system trouble","A closed valve","A test","Alarm = a fire or other emergency condition."],
+[C,"A waterflow alarm-initiating device must initiate an alarm within:","90 seconds of flow equal to one sprinkler","10 seconds","5 minutes","30 minutes","Waterflow devices must signal within 90 s."],
+[C,"Smoke detector sensitivity must first be tested within ___ of installation, then every alternate year:","1 year","6 months","2 years","5 years","First test within 1 year, then every other year (if listed range, may be extended)."],
+[C,"Manual fire alarm boxes must be tested:","Annually","Quarterly","Monthly","Every 5 years","Manual stations are tested annually."],
+[C,"Waterflow switches must be tested:","Semiannually","Quarterly","Annually","Monthly","Semiannually."],
+[C,"Valve tamper switches must be tested:","Semiannually","Monthly","Annually","Every 5 years","Tamper switches are tested semiannually."],
+[C,"Fire alarm test records must be retained until the next test and for how long thereafter?","1 year","1 month","6 months","5 years","Keep until the next test and for 1 year afterwards."],
+[C,"When a system is out of service for more than ___ in a 24-hour period, the AHJ and building occupants must be notified:","4 hours","1 hour","10 hours","24 hours","NFPA 72 impairments > 4 hours in 24 hr require notification (NFPA 25 uses 10 hours)."],
+[C,"Which organization's certification is cited in NFPA 72 as an example of qualified ITM personnel?","NICET","ASHRAE","IEEE","ANSI","NFPA 72 lists NICET certification as one means of demonstrating qualification."],
+[C,"Which NFPA 72 chapter covers inspection, testing and maintenance?","Chapter 14","Chapter 10","Chapter 17","Chapter 26","Chapter 14: ITM."],
+[C,"Which NFPA 72 chapter covers initiating devices?","Chapter 17","Chapter 18","Chapter 12","Chapter 29","Chapter 17: Initiating Devices."],
+[C,"Which NFPA 72 chapter covers notification appliances?","Chapter 18","Chapter 17","Chapter 21","Chapter 24","Chapter 18: Notification Appliances."],
+[C,"Which NFPA 72 chapter covers fundamentals of fire alarm systems (e.g., power supplies, signals priorities)?","Chapter 10","Chapter 7","Chapter 14","Chapter 23","Chapter 10: Fundamentals."],
+[C,"Which NFPA 72 chapter covers circuits and pathways?","Chapter 12","Chapter 10","Chapter 24","Chapter 21","Chapter 12: Circuits and Pathways."],
+[C,"Which NFPA 72 chapter covers emergency control functions (elevator recall, HVAC shutdown)?","Chapter 21","Chapter 14","Chapter 26","Chapter 18","Chapter 21: Emergency Control Functions and Interfaces."],
+[C,"Which NFPA 72 chapter covers supervising station alarm systems?","Chapter 26","Chapter 29","Chapter 17","Chapter 10","Chapter 26: Supervising Station Alarm Systems."],
+[C,"Which NFPA 72 chapter covers single- and multiple-station alarms and household systems?","Chapter 29","Chapter 26","Chapter 23","Chapter 12","Chapter 29: Single- and Multiple-Station Alarms and Household Systems."],
+[C,"A Class A pathway:","Provides a redundant return path so a single open does not lose devices","Is a single path with no redundancy","Is wireless only","Is only for notification","Class A has a return path, tolerating a single open fault."],
+[C,"A Class B pathway:","Has a single path; an open fault loses devices beyond the break","Has a redundant return path","Uses fiber only","Is prohibited","Class B = one path (devices past an open are lost)."],
+[C,"Pathway Survivability Level 2 requires:","Two-hour fire-rated cable, circuit integrity cable, or equivalent","No protection","One-hour only for all","Sprinklers only","Level 2: 2-hour rating or fully sprinklered building with additional protection."],
+[C,"A signaling line circuit (SLC):","Carries data between the control unit and addressable devices","Powers only strobes","Is a public telephone line","Is only used in households","SLC carries multiplexed signals."],
+[C,"A notification appliance circuit (NAC):","Connects horns/strobes/speakers to the control unit","Connects only pull stations","Is a telephone circuit","Is a data network","NAC powers notification appliances."],
+[C,"Elevator Phase I recall is initiated by smoke detectors located:","In elevator lobbies, machine rooms and hoistways","In every corridor","Only at the main panel","At the roof","Detectors in elevator lobbies, machine room, and hoistway initiate recall."],
+[C,"If a detector in the designated-level elevator lobby activates, elevators recall to:","The alternate (approved) level","The same designated level","The top floor","Remain in place","Alternate recall level is used when the designated level has a fire signal."],
+[C,"Spot-type smoke detectors should not be installed where air velocity exceeds:","300 ft/min","100 ft/min","600 ft/min","1,000 ft/min","Air velocity > 300 ft/min (1.5 m/s) requires listed detectors."],
+[C,"Smoke alarms must be replaced after:","10 years","5 years","20 years","30 years","Replace smoke alarms 10 years from manufacture date."],
+[C,"Household smoke alarms are required:","In each sleeping room, outside sleeping areas, and on every level","Only in the kitchen","Only in bedrooms","Only in the garage","Chapter 29 requires alarms in sleeping rooms, outside sleeping areas, and on each level."],
+[C,"A ground fault on a fire alarm circuit must:","Be detected and indicated as a trouble signal","Be ignored","Trigger an alarm","Silence the system","Ground faults must be detected and indicated."],
+[C,"An unwanted alarm is:","Any alarm not caused by a real emergency (nuisance, false, or unknown)","Only malicious alarms","A system test","A supervisory signal","Unwanted alarm is the umbrella category."],
+[C,"Fire alarm signal priority is generally:","Alarm over supervisory and trouble","Trouble over alarm","Supervisory over alarm","All equal","Alarm signals take priority over supervisory and trouble."],
+[C,"An annunciator is:","A unit that indicates the status/location of signals","A power supply","A strobe","A smoke detector","Annunciators visually indicate zone/device state."],
+[C,"A Record of Completion documents:","Installed system as designed and tested","Annual inspection results only","Owner's insurance info","Detector cleaning","The record of completion is completed after installation/acceptance."],
+[C,"Duct smoke detectors are primarily used to:","Shut down HVAC to limit smoke spread","Replace area smoke detection","Open smoke vents only","Detect heat","Duct detectors initiate fan shutdown; they are not a substitute for open area detection."],
+[C,"Photoelectric smoke detectors generally respond best to:","Smoldering fires","Fast flaming fires","Heat","Carbon monoxide only","Photoelectric: larger smoke particles of smoldering fires."],
+[C,"Ionization smoke detectors generally respond best to:","Fast flaming fires","Smoldering fires","Heat","Gas leaks","Ionization: small particles from flaming fires."],
+[C,"A rate-of-rise heat detector responds to:","A rapid increase in temperature","A fixed temperature only","Smoke","Light","Rate-of-rise detects fast temperature changes."],
+[C,"Magnetic door holders must:","Release upon alarm or power loss","Hold doors during alarm","Stay locked","Require manual reset","Door holders release on alarm to allow door closure."],
+// ---------------- OSHA 29 CFR 1926 ----------------
+[D,"Fall protection is required in construction at unprotected edges at or above:","6 feet","4 feet","10 feet","15 feet","1926.501(b)(1): 6 ft in construction (4 ft in general industry)."],
+[D,"Top rail height of a guardrail system:","42 in. plus or minus 3 in.","30 in.","36 in.","60 in.","Top rail at 42 in. ±3 in."],
+[D,"Guardrail top rails must withstand at least:","200 lb applied in any outward or downward direction","50 lb","100 lb","500 lb","Top edge force of 200 lb."],
+[D,"Toeboards must be at least:","3-1/2 in. tall","1 in.","6 in.","12 in.","Toeboard at least 3-1/2 in. high."],
+[D,"Personal fall arrest systems must limit the maximum arresting force on the employee to:","1,800 lb with a body harness","900 lb","5,000 lb","2,500 lb","Body harness: 1,800 lb max."],
+[D,"Personal fall arrest systems must limit free fall to:","6 feet or less","10 feet","3 feet","12 feet","Maximum free fall distance is 6 ft."],
+[D,"Anchorages for personal fall arrest must support at least:","5,000 lb per employee attached","1,000 lb","2,500 lb","10,000 lb","5,000 lb per employee (or designed under qualified person supervision)."],
+[D,"Body belts may be used for:","Positioning/restraint, but not fall arrest","Fall arrest","Nothing","Crane rigging","Body belts are not acceptable for fall arrest."],
+[D,"A ladder or stairway is required when a break in elevation is:","19 inches or more","6 inches","12 inches","4 feet","1926.1051: 19 in. or more."],
+[D,"A portable ladder used to access an upper landing must extend above it by at least:","3 feet","1 foot","6 inches","6 feet","Side rails extend at least 3 ft above the landing."],
+[D,"The correct setup angle for a non-self-supporting ladder is a horizontal distance of about:","1/4 the working length of the ladder","1/2 the length","1/8 the length","Equal to the height","4:1 ratio."],
+[D,"Uniform spacing of ladder rungs must be between:","10 and 14 inches","6 and 8 inches","16 and 20 inches","18 and 24 inches","Rungs 10–14 in. apart."],
+[D,"Stairways with how many risers (or rise) require handrails/stair rail systems?","4 or more risers or more than 30 in. rise","2 risers","10 risers","3 risers only","4+ risers or >30 in. rise."],
+[D,"Handrail height on temporary stairs is:","30 to 37 inches","24 to 30 inches","42 to 48 inches","50 to 60 inches","Handrails 30–37 in. from the tread."],
+[D,"Scaffold platforms must be at least ___ wide (general rule):","18 inches","12 inches","24 inches","36 inches","Minimum 18 in. platform width."],
+[D,"Fall protection on scaffolds is required above:","10 feet","6 feet","15 feet","20 feet","Employees on scaffolds more than 10 ft above a lower level need fall protection."],
+[D,"Scaffolds must support without failure at least ___ times their maximum intended load:","4","2","6","10","Supported scaffolds: 4×; suspension scaffold rope: 6×."],
+[D,"Scaffold planks must extend over their end supports by:","6 to 12 inches","1 to 3 inches","12 to 18 inches","24 to 36 inches","Plank overhang: not less than 6 in., not more than 12 in."],
+[D,"A competent person is one who:","Can identify existing/predictable hazards and has authority to correct them","Has a college degree only","Is the project owner","Is OSHA staff","Competent person definition under 1926."],
+[D,"Excavations must have a protective system when depth is:","5 feet or deeper (unless stable rock)","2 feet","10 feet","20 feet","1926.652: protective system for excavations ≥5 ft (unless in stable rock)."],
+[D,"Trenches 4 feet or deeper need a means of egress within what lateral travel distance?","25 feet","50 feet","10 feet","100 feet","Ladders/steps within 25 ft of workers."],
+[D,"Excavated material (spoil) must be kept back from the edge by at least:","2 feet","6 inches","10 feet","1 foot","Keep spoils and equipment at least 2 ft from the edge."],
+[D,"Maximum allowable slope for Type A soil:","3/4 : 1","1 : 1","1-1/2 : 1","2 : 1","Type A 3/4:1; B 1:1; C 1.5:1."],
+[D,"Type C soil unconfined compressive strength is:","0.5 tsf or less","1.5 tsf or more","Between 0.5 and 1.5 tsf","Over 4.5 tsf","Type C: ≤0.5 tsf."],
+[D,"GFCI protection is required on construction sites for:","120-volt, 15-, 20- and 30-amp receptacles not part of permanent wiring","Only 240-volt outlets","Only permanent wiring","Only exterior outlets","1926.404(b)(1)(ii)."],
+[D,"The minimum clearance from overhead power lines up to 50 kV for equipment is:","10 feet","3 feet","20 feet","50 feet","10 ft for lines up to 50 kV."],
+[D,"The OSHA construction noise PEL (8-hour TWA) is:","90 dBA","85 dBA","95 dBA","100 dBA","Construction (1926.52): 90 dBA for 8 hours."],
+[D,"Fire extinguishers on construction sites are required at one rated not less than ___ per 3,000 sq ft:","2A","1A","10B","40BC","2A for each 3,000 sq ft (or major fraction); max travel 100 ft."],
+[D,"Travel distance to a fire extinguisher on a construction site must not exceed:","100 feet","25 feet","50 feet","200 feet","Travel distance max 100 ft."],
+[D,"A 10B extinguisher is required within ___ of where more than 5 gallons of flammable/combustible liquids are used:","50 feet","10 feet","100 feet","25 feet","Within 50 ft."],
+[D,"Maximum flammable liquid permitted in a room outside an approved storage cabinet:","25 gallons","5 gallons","60 gallons","100 gallons","Not more than 25 gal outside of cabinets in a building."],
+[D,"Fire watch after welding/cutting must continue for at least:","30 minutes","10 minutes","60 minutes","4 hours","Fire watch for at least a half hour after hot work."],
+[D,"Combustibles near welding/cutting must be moved at least:","35 feet","10 feet","20 feet","50 feet","Move combustibles 35 ft or protect them."],
+[D,"Oxygen cylinders in storage must be separated from fuel gas cylinders by at least:","20 feet (or a 5-ft noncombustible barrier)","5 feet","10 feet","35 feet","1926.350: 20 ft or 5-ft high barrier."],
+[D,"The OSHA lead PEL is:","50 µg/m³ (8-hr TWA)","10 µg/m³","500 µg/m³","5 µg/m³","Lead PEL = 50 µg/m³."],
+[D,"The respirable crystalline silica PEL is:","50 µg/m³ (8-hr TWA)","500 µg/m³","25 µg/m³","5 µg/m³","Silica PEL = 50 µg/m³; action level 25."],
+[D,"Acceptable oxygen range for entry into a confined space is:","19.5% to 23.5%","10% to 15%","21% to 30%","16% to 19%","Atmospheres of 19.5–23.5% oxygen."],
+[D,"Under 1926 Subpart F, an alarm system for fire emergencies must:","Alert on-site employees and the local fire department","Only alert the owner","Be silent","Only be a bell","1926.150(d): alarm system for employees and fire department."],
+[D,"Steel erection fall protection is required at heights over:","15 feet","6 feet","10 feet","30 feet","1926.760: unprotected sides/edges >15 ft."],
+[D,"Lumber piles handled manually must not exceed:","16 feet","10 feet","20 feet","6 feet","Manually handled lumber piles: max 16 ft (20 ft if mechanically)."],
+[D,"Danger signs use what colors?","Red, black and white","Yellow and black","Green and white","Blue and white","Danger = red; caution = yellow."],
+[D,"When medical facilities are not reasonably accessible, the site must have:","A person with valid first aid training","A dispensary doctor","A helicopter","Nothing","1926.50(c): first aid-trained person required."],
+[D,"Carbon tetrachloride extinguishers are:","Prohibited","Allowed outdoors","Allowed for Class C","Required in garages","Toxic vaporizing liquid extinguishers are prohibited."]
+];
+
+const TEST_SIZE = 20;
+let current = [];
+let submitted = false;
+
+function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
+
+function newTest(){
+  submitted = false;
+  const f = document.getElementById('src').value;
+  const pool = shuffle(BANK.filter(q => f==='ALL' || q[0]===f));
+  current = pool.slice(0, Math.min(TEST_SIZE, pool.length)).map(q => {
+    const opts = shuffle([{t:q[2],ok:true},{t:q[3],ok:false},{t:q[4],ok:false},{t:q[5],ok:false}]);
+    return {cat:q[0], q:q[1], opts, expl:q[6], sel:null};
+  });
+  render();
+  window.scrollTo(0,0);
+}
+
+function render(){
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = '';
+  current.forEach((it,i)=>{
+    const d = document.createElement('div'); d.className='card';
+    d.innerHTML = `<div class="tag">${esc(it.cat)} • Question ${i+1}</div><div class="q">${esc(it.q)}</div>`;
+    it.opts.forEach((o,j)=>{
+      const l = document.createElement('label');
+      l.innerHTML = `<input type="radio" name="q${i}" value="${j}" ${it.sel===j?'checked':''} ${submitted?'disabled':''}> ${String.fromCharCode(65+j)}. ${esc(o.t)}`;
+      l.querySelector('input').onchange = ()=>{ it.sel=j; updateProgress(); };
+      if(submitted){
+        if(o.ok) l.classList.add('correct');
+        else if(it.sel===j) l.classList.add('wrong');
+      }
+      d.appendChild(l);
+    });
+    if(submitted){
+      const e = document.createElement('div'); e.className='expl';
+      const right = it.sel!==null && it.opts[it.sel].ok;
+      e.innerHTML = `<b>${it.sel===null?'Unanswered':right?'Correct':'Incorrect'}.</b> ${esc(it.expl)}`;
+      d.appendChild(e);
+    }
+    quiz.appendChild(d);
+  });
+  const a = document.getElementById('actions');
+  a.innerHTML = submitted ? '' : '<button id="sub">Submit for Grading</button>';
+  if(!submitted) document.getElementById('sub').onclick = grade;
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = current.filter(c=>c.sel!==null).length;
+  document.getElementById('progress').textContent = submitted ? 'Graded' : `Answered ${n} of ${current.length}`;
+}
+
+function grade(){
+  const un = current.filter(c=>c.sel===null).length;
+  if(un && !confirm(`${un} question(s) unanswered. Submit anyway?`)) return;
+  submitted = true;
+  const score = current.filter(c=>c.sel!==null && c.opts[c.sel].ok).length;
+  const pct = Math.round(score/current.length*100);
+  render();
+  const a = document.getElementById('actions');
+  a.innerHTML = `<div id="result">Score: ${score} / ${current.length} (${pct}%) <span class="${pct>=70?'pass':'fail'}">${pct>=70?'PASS (70%+)':'Below 70% – keep studying'}</span></div>
+    <p>Review the highlighted answers and explanations above.</p>
+    <button id="again">Take a New Test</button> <button class="alt" id="top">Back to Top</button>`;
+  document.getElementById('again').onclick = newTest;
+  document.getElementById('top').onclick = ()=>window.scrollTo(0,0);
+  a.scrollIntoView({behavior:'smooth'});
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+document.getElementById('src').onchange = newTest;
+newTest();
+</script>
+</body>
+</html>
